@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'pokemon.dart';
 
 class QuizLogic {
@@ -7,7 +8,7 @@ class QuizLogic {
   int score = 0;
   bool gameOver = false;
 
-  static const int MAX_QUESTIONS = 10; // Definir o número máximo de perguntas
+  static const int MAX_QUESTIONS = 10;
 
   late Pokemon correctPokemon;
   List<Pokemon> randomPokemons = [];
@@ -19,13 +20,12 @@ class QuizLogic {
   void reset() {
     _currentQuestionIndex = 0;
     score = 0;
-    gameOver = false; // Adicione esta linha
+    gameOver = false;
     _loadQuestion();
   }
 
   void nextQuestion() {
     if (_currentQuestionIndex < MAX_QUESTIONS - 1) {
-      // Modificar esta linha
       _currentQuestionIndex++;
       _loadQuestion();
     } else {
@@ -37,9 +37,7 @@ class QuizLogic {
     if (chosenPokemon == correctPokemon) {
       score++;
       if (_currentQuestionIndex == MAX_QUESTIONS - 1) {
-        // Adicione esta condição
         gameOver = true;
-        return false; // O jogo terminou mesmo que a resposta esteja correta
       }
       return true;
     }
@@ -51,7 +49,7 @@ class QuizLogic {
   }
 
   void _loadQuestion() {
-    _getRandomPokemons(); // Lógica para carregar a próxima pergunta.
+    _getRandomPokemons();
   }
 
   void _getRandomPokemons() {
