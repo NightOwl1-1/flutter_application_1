@@ -24,46 +24,95 @@ class _PokemonQuizPageState extends State<PokemonQuizPage> {
   late QuizLogic quiz;
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Pokemon>>(
-      future: Pokemon.fetchPokemons(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            quiz = QuizLogic(snapshot.data!); // Removido o "if (quiz == null)"
+  void initState() {
+    super.initState();
+    Pokemon.fetchPokemons().then((pokemons) {
+      setState(() {
+        quiz = QuizLogic(pokemons);
+      });
+    });
+  }
 
-            return Scaffold(
-              appBar: AppBar(title: Text('Pokémon Quiz')),
-              body: quiz.isGameOver()
-                  ? Center(child: Text('Game Over! Your score: ${quiz.score}'))
-                  : Column(
-                      children: <Widget>[
-                        Image.network(quiz.correctPokemon.imageUrl),
-                        ...quiz.randomPokemons
-                            .map((pokemon) => ElevatedButton(
-                                  child: Text(pokemon.name),
-                                  onPressed: () {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Pokémon Quiz')),
+      body: Center(
+        child: quiz == null
+            ? CircularProgressIndicator()
+            : quiz.isGameOver()
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Game Over! Your score: ${quiz.score}',
+                          style: TextStyle(fontSize: 20)),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            quiz.reset();
+                          });
+                        },
+                        child: Text('Play Again'),
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Image.network(
+                          quiz.correctPokemon.imageUrl,
+                          height: MediaQuery.of(context).size.height * 0.4,
+                        ),
+                      ),
+                      ...quiz.randomPokemons
+                          .map((pokemon) => Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: InkWell(
+                                  onTap: () {
                                     final isCorrect = quiz.checkAnswer(pokemon);
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text(
+                                        isCorrect
+                                            ? 'Correct!'
+                                            : 'Wrong! Try again.',
+                                      ),
+                                      duration: Duration(seconds: 1),
+                                    ));
                                     if (isCorrect) {
-                                      quiz.nextQuestion();
-                                    } else {
-                                      if (quiz.isGameOver()) {
-                                        // Mostrar diálogo de fim de jogo ou redirecionar
-                                      }
+                                      Future.delayed(Duration(seconds: 1), () {
+                                        setState(() {
+                                          quiz.nextQuestion();
+                                        });
+                                      });
                                     }
-                                    setState(() {});
                                   },
-                                ))
-                            .toList(),
-                      ],
-                    ),
-            );
-          } else {
-            return Center(child: Text('Error loading pokemons!'));
-          }
-        }
-        return Center(child: CircularProgressIndicator());
-      },
+                                  child: Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    padding: EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        pokemon.name,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                    ],
+                  ),
+      ),
     );
   }
 }
