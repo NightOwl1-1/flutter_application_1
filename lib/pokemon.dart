@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+ 
 class Pokemon {
   final String name;
   final String imageUrl;
-
+ 
   Pokemon({required this.name, required this.imageUrl});
-
+ 
   static Future<List<Pokemon>> fetchPokemons() async {
     final response = await http
         .get(Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=150'));
@@ -27,3 +27,4 @@ class Pokemon {
     }
   }
 }
+ 
