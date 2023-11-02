@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pokemon.dart';
 import 'quiz.logic.dart';
+import 'score_card.dart';
 
 void main() => runApp(MyApp());
 
@@ -41,78 +42,92 @@ class _PokemonQuizPageState extends State<PokemonQuizPage> {
         child: quiz == null
             ? CircularProgressIndicator()
             : quiz.isGameOver()
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Game Over! Your score: ${quiz.score}',
-                          style: TextStyle(fontSize: 20)),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            quiz.reset();
-                          });
-                        },
-                        child: Text('Play Again'),
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Image.network(
-                          quiz.correctPokemon.imageUrl,
-                          height: MediaQuery.of(context).size.height * 0.4,
-                        ),
-                      ),
-                      ...quiz.randomPokemons
-                          .map((pokemon) => Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    final isCorrect = quiz.checkAnswer(pokemon);
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Text(
-                                        isCorrect
-                                            ? 'Correct!'
-                                            : 'Wrong! Try again.',
-                                      ),
-                                      duration: Duration(seconds: 1),
-                                    ));
-                                    if (isCorrect) {
-                                      Future.delayed(Duration(seconds: 1), () {
-                                        setState(() {
-                                          quiz.nextQuestion();
-                                        });
-                                      });
-                                    }
-                                  },
-                                  child: Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.6,
-                                    padding: EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        pokemon.name,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ))
-                          .toList(),
-                    ],
-                  ),
+                ? _buildResultWidget()
+                : _buildQuestionWidget(),
       ),
+    );
+  }
+
+  Widget _buildQuestionWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Image.network(
+            quiz.correctPokemon.imageUrl,
+            height: MediaQuery.of(context).size.height * 0.3,
+          ),
+        ),
+        ...quiz.randomPokemons.map((pokemon) => _buildButton(pokemon)).toList(),
+        ScoreCard(
+          correctAnswers: quiz.correctAnswers,
+          wrongAnswers: quiz.wrongAnswers,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildButton(Pokemon pokemon) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: ElevatedButton(
+        onPressed: () {
+          final isCorrect = quiz.checkAnswer(pokemon);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(isCorrect ? 'Correct!' : 'Wrong answer!'),
+            duration: Duration(seconds: 1),
+          ));
+          setState(() {
+            quiz.nextQuestion();
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          primary: Colors.blue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          minimumSize: Size(MediaQuery.of(context).size.width * 0.4, 0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            pokemon.name,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'Quiz Finished!',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          'Correct Answers: ${quiz.correctAnswers}',
+          style: TextStyle(fontSize: 18, color: Colors.green),
+        ),
+        Text(
+          'Wrong Answers: ${quiz.wrongAnswers}',
+          style: TextStyle(fontSize: 18, color: Colors.red),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              quiz.reset();
+            });
+          },
+          child: Text('Try Again'),
+        ),
+      ],
     );
   }
 }
