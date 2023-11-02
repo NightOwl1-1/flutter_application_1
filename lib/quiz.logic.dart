@@ -5,8 +5,8 @@ import 'pokemon.dart';
 class QuizLogic {
   final List<Pokemon> allPokemons;
   int _currentQuestionIndex = 0;
-  int score = 0;
-  bool gameOver = false;
+  int correctAnswers = 0;
+  int wrongAnswers = 0;
 
   static const int MAX_QUESTIONS = 10;
 
@@ -17,39 +17,32 @@ class QuizLogic {
     _getRandomPokemons();
   }
 
-  void reset() {
-    _currentQuestionIndex = 0;
-    score = 0;
-    gameOver = false;
-    _loadQuestion();
-  }
-
-  void nextQuestion() {
-    if (_currentQuestionIndex < MAX_QUESTIONS - 1) {
-      _currentQuestionIndex++;
-      _loadQuestion();
-    } else {
-      gameOver = true;
-    }
-  }
-
   bool checkAnswer(Pokemon chosenPokemon) {
-    if (chosenPokemon == correctPokemon) {
-      score++;
-      if (_currentQuestionIndex == MAX_QUESTIONS - 1) {
-        gameOver = true;
-      }
-      return true;
+    final isCorrect = chosenPokemon == correctPokemon;
+    if (isCorrect) {
+      correctAnswers++;
+    } else {
+      wrongAnswers++;
     }
-    return false;
+    return isCorrect;
   }
 
   bool isGameOver() {
-    return gameOver;
+    return _currentQuestionIndex >= MAX_QUESTIONS;
   }
 
-  void _loadQuestion() {
+  void reset() {
+    _currentQuestionIndex = 0;
+    correctAnswers = 0;
+    wrongAnswers = 0;
     _getRandomPokemons();
+  }
+
+  void nextQuestion() {
+    if (!isGameOver()) {
+      _currentQuestionIndex++;
+      _getRandomPokemons();
+    }
   }
 
   void _getRandomPokemons() {
