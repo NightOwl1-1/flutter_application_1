@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'pokemon.dart';
 import 'quiz.logic.dart';
 import 'score_card.dart';
-
+ 
 void main() => runApp(MyApp());
-
+ 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -15,15 +15,15 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
+ 
 class PokemonQuizPage extends StatefulWidget {
   @override
   _PokemonQuizPageState createState() => _PokemonQuizPageState();
 }
-
+ 
 class _PokemonQuizPageState extends State<PokemonQuizPage> {
   late QuizLogic quiz;
-
+ 
   @override
   void initState() {
     super.initState();
@@ -33,7 +33,7 @@ class _PokemonQuizPageState extends State<PokemonQuizPage> {
       });
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +47,7 @@ class _PokemonQuizPageState extends State<PokemonQuizPage> {
       ),
     );
   }
-
+ 
   Widget _buildQuestionWidget() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -67,7 +67,7 @@ class _PokemonQuizPageState extends State<PokemonQuizPage> {
       ],
     );
   }
-
+ 
   Widget _buildButton(Pokemon pokemon) {
     return Padding(
       padding: const EdgeInsets.all(4.0),
@@ -75,7 +75,7 @@ class _PokemonQuizPageState extends State<PokemonQuizPage> {
         onPressed: () {
           final isCorrect = quiz.checkAnswer(pokemon);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(isCorrect ? 'Correct!' : 'Wrong answer!'),
+            content: Text(isCorrect ? 'Resposta Correta!' : 'Resposta Errada!'),
             duration: Duration(seconds: 1),
           ));
           setState(() {
@@ -102,32 +102,36 @@ class _PokemonQuizPageState extends State<PokemonQuizPage> {
       ),
     );
   }
-
+ 
   Widget _buildResultWidget() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          'Quiz Finished!',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        Text(
-          'Correct Answers: ${quiz.correctAnswers}',
-          style: TextStyle(fontSize: 18, color: Colors.green),
-        ),
-        Text(
-          'Wrong Answers: ${quiz.wrongAnswers}',
-          style: TextStyle(fontSize: 18, color: Colors.red),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              quiz.reset();
-            });
-          },
-          child: Text('Try Again'),
-        ),
-      ],
-    );
+    if (quiz != null) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Quiz Finalizado!',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            'Respostas Corretas: ${quiz.correctAnswers}',
+            style: TextStyle(fontSize: 18, color: Colors.green),
+          ),
+          Text(
+            'Respostas Erradas: ${quiz.wrongAnswers}',
+            style: TextStyle(fontSize: 18, color: Colors.red),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                quiz.reset();
+              });
+            },
+            child: Text('Tentar de novo?'),
+          ),
+        ],
+      );
+    } else {
+      return CircularProgressIndicator(); //Mostra um indicador de progresso até que o quiz seja inicializado.
+    }
   }
 }
